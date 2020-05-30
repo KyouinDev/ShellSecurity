@@ -29,7 +29,7 @@ public class ListenerExplosion implements Listener {
         if (e instanceof BlockExplodeEvent) blocks = ((BlockExplodeEvent) e).blockList();
         else blocks = ((EntityExplodeEvent) e).blockList();
 
-        if (shellSec.getConfig().getBoolean("explosions-break-claimed", false)) {
+        if (shellSec.getConfig().getBoolean("explosions-break-locked", false)) {
             NamespacedKey shulkerOwnerKey = shellSec.getConstants().getShulkerOwnerKey();
 
             blocks.stream().filter(block -> block.getType().name().contains("SHULKER_BOX")).forEach(block -> {

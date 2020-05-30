@@ -1,5 +1,5 @@
 admin-bypass: true
 admin-alerts-break: true
 admin-alerts-interact: true
-disallows-claim-non-empty: true
-explosions-break-claimed: false
+disallows-lock-non-empty: true
+explosions-break-locked: false

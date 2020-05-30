@@ -5,19 +5,19 @@ api-version: '1.14'
 description: Property over shulker boxes!
 author: Kyouin
 permissions:
-  shellsec.claim:
+  shellsec.lock:
     default: true
-    description: Claim a shulker box.
+    description: Lock a shulker box.
   shellsec.bypass:
     default: op
-    description: Bypass a shulker box claim.
+    description: Bypass a shulker box lock.
   shellsec.alerts.*:
     default: op
-    description: See alerts for claimed shulker boxes.
+    description: See alerts for locked shulker boxes.
     children:
       shellsec.alerts.break:
         default: op
-        description: See alerts when players try to break claimed shulker boxes.
+        description: See alerts when players try to break locked shulker boxes.
       shellsec.alerts.interact:
         default: op
-        description: See alerts when players try to interact with claimed shulker boxes.
+        description: See alerts when players try to interact with locked shulker boxes.
