@@ -17,6 +17,5 @@ public class Constants {
 
     //static ones
 
-    public final static String PREFIX = "§dShellSecurity §7";
-    public final static String PREFIX_ERROR = "§dShellSecurity §c";
+    public final static String PREFIX = "§dShellSecurity";
 }

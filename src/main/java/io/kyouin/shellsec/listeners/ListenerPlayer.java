@@ -1,7 +1,6 @@
 package io.kyouin.shellsec.listeners;
 
 import io.kyouin.shellsec.ShellSecurity;
-import io.kyouin.shellsec.utils.Constants;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -46,18 +45,18 @@ public class ListenerPlayer implements Listener {
 
         if (shulkerOwner != null && !shulkerOwner.equals(uuid)) {
             if (shellSec.getConfig().getBoolean("admin-bypass", true) && p.hasPermission("shellsec.bypass")) {
-                p.sendMessage(Constants.PREFIX + "You opened a locked shulker box.");
+                shellSec.getMessages().sendMessage(p,"§7You opened a locked shulker box.");
             } else {
                 e.setCancelled(true);
-                p.sendMessage(Constants.PREFIX_ERROR + "You can't interact with a locked shulker box.");
+                shellSec.getMessages().send(p,"§cYou can't interact with a locked shulker box.");
 
                 if (shellSec.getConfig().getBoolean("admin-alerts-interact", true)) {
-                    String error = Constants.PREFIX + "§8" + p.getName() + " §7attempted to interact with a locked shulker box.";
+                    String error = "§8" + p.getName() + " §7attempted to interact with a locked shulker box.";
 
-                    Bukkit.getConsoleSender().sendMessage(error);
+                    shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), error);
                     Bukkit.getServer().getOnlinePlayers().stream()
                             .filter(player -> player.hasPermission("shellsec.alerts.interact"))
-                            .forEach(op -> op.sendMessage(error));
+                            .forEach(op -> shellSec.getMessages().sendMessage(op, error));
                 }
             }
 
@@ -72,16 +71,16 @@ public class ListenerPlayer implements Listener {
 
             if (p.hasPermission("shellsec.lock")) {
                 if (shellSec.getConfig().getBoolean("disallows-lock-non-empty", false) && !Arrays.stream(shulker.getInventory().getContents()).allMatch(content -> content == null || content.getType() == Material.AIR)) {
-                    p.sendMessage(Constants.PREFIX_ERROR + "You can't lock a non-empty shulker box.");
+                    shellSec.getMessages().send(p,"§cYou can't lock a non-empty shulker box.");
                 } else {
                     dataContainer.set(shulkerOwnerKey, PersistentDataType.STRING, uuid);
                     shulker.update();
 
                     item.setAmount(item.getAmount() - 1);
-                    p.sendMessage(Constants.PREFIX + "You locked this shulker box.");
+                    shellSec.getMessages().send(p,"§7You locked this shulker box.");
                 }
             } else {
-                p.sendMessage(Constants.PREFIX_ERROR + "You can't lock a shulker box.");
+                shellSec.getMessages().send(p,"§cYou can't lock a shulker box.");
             }
         } else if (material == Material.MILK_BUCKET && shulkerOwner != null) {
             e.setCancelled(true);
@@ -90,7 +89,7 @@ public class ListenerPlayer implements Listener {
             shulker.update();
 
             item.setType(Material.BUCKET);
-            p.sendMessage(Constants.PREFIX + "You unlocked this shulker box.");
+            shellSec.getMessages().send(p, "§7You unlocked this shulker box.");
         }
     }
 
@@ -123,15 +122,15 @@ public class ListenerPlayer implements Listener {
 
         if (!shulkerOwner.equals(uuid)) {
             e.setCancelled(true);
-            p.sendMessage(Constants.PREFIX_ERROR + "You can't break a locked shulker box.");
+            shellSec.getMessages().send(p,"§cYou can't break a locked shulker box.");
 
             if (shellSec.getConfig().getBoolean("admin-alerts-break", true)) {
-                String error = Constants.PREFIX + "§8" + p.getName() + " §7attempted to break a locked shulker box.";
+                String error = "§8" + p.getName() + " §7attempted to break a locked shulker box.";
 
-                Bukkit.getConsoleSender().sendMessage(error);
+                shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), error);
                 Bukkit.getServer().getOnlinePlayers().stream()
                         .filter(player -> player.hasPermission("shellsec.alerts.break"))
-                        .forEach(op -> op.sendMessage(error));
+                        .forEach(op -> shellSec.getMessages().sendMessage(op, error));
             }
 
             return;

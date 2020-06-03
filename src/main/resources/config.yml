@@ -3,3 +3,4 @@ admin-alerts-break: true
 admin-alerts-interact: true
 disallows-lock-non-empty: true
 explosions-break-locked: false
+messages-as-titles: false
