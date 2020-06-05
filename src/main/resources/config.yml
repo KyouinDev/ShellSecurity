@@ -2,5 +2,5 @@ admin-bypass: true
 admin-alerts-break: true
 admin-alerts-interact: true
 disallows-lock-non-empty: true
-explosions-break-locked: false
-messages-as-titles: false
+explosions-break-locked: true
+messages-as-titles: true
