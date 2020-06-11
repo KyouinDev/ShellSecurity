@@ -1,6 +1,6 @@
 main: io.kyouin.shellsec.ShellSecurity
 name: ShellSecurity
-version: '1.1.1'
+version: '1.2.0'
 api-version: '1.14'
 description: Property over shulker boxes!
 author: Kyouin

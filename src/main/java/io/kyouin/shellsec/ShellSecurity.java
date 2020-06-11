@@ -18,6 +18,8 @@ public class ShellSecurity extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        messages.reloadConfig();
+
         saveDefaultConfig();
         reloadConfig();
 
