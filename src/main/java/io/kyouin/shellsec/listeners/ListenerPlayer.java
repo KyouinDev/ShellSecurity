@@ -45,16 +45,16 @@ public class ListenerPlayer implements Listener {
 
         if (shulkerOwner != null && !shulkerOwner.equals(uuid)) {
             if (shellSec.getConfig().getBoolean("admin-bypass", true) && p.hasPermission("shellsec.bypass")) {
-                shellSec.getMessages().sendMessage(p,"bypass-open-locked");
+                shellSec.getMessages().sendMessage(p,null, "bypass-open-locked");
             } else {
                 e.setCancelled(true);
                 shellSec.getMessages().send(p,"cant-interact-locked");
 
                 if (shellSec.getConfig().getBoolean("admin-alerts-interact", true)) {
-                    shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), "interact-locked-attempt");
+                    shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), p, "interact-locked-attempt");
                     Bukkit.getServer().getOnlinePlayers().stream()
                             .filter(player -> player.hasPermission("shellsec.alerts.interact"))
-                            .forEach(op -> shellSec.getMessages().sendMessage(op, "interact-locked-attempt"));
+                            .forEach(op -> shellSec.getMessages().sendMessage(op, p, "interact-locked-attempt"));
                 }
             }
 
@@ -123,10 +123,10 @@ public class ListenerPlayer implements Listener {
             shellSec.getMessages().send(p,"cant-break-locked");
 
             if (shellSec.getConfig().getBoolean("admin-alerts-break", true)) {
-                shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), "break-locked-attempt");
+                shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), p, "break-locked-attempt");
                 Bukkit.getServer().getOnlinePlayers().stream()
                         .filter(player -> player.hasPermission("shellsec.alerts.break"))
-                        .forEach(op -> shellSec.getMessages().sendMessage(op, "break-locked-attempt"));
+                        .forEach(op -> shellSec.getMessages().sendMessage(op, p, "break-locked-attempt"));
             }
 
             return;

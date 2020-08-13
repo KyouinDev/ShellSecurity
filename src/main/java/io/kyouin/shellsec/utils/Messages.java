@@ -33,14 +33,16 @@ public class Messages {
         config = YamlConfiguration.loadConfiguration(new File(shellSec.getDataFolder(), "messages.yml"));
     }
 
-    public void sendMessage(CommandSender to, String message) {
-        message = getMessageOrDefault(message).replaceAll("&", "§").replace("{name}", to.getName());
+    public void sendMessage(CommandSender to, Player who, String message) {
+        message = getMessageOrDefault(message).replaceAll("&", "§");
+
+        if (who != null) message = message.replace("{name}", to.getName());
 
         to.sendMessage(Constants.PREFIX + " " + message);
     }
 
     public void send(Player p, String message) {
-        message = getMessageOrDefault(message).replaceAll("&", "§").replace("{name}", p.getName());
+        message = getMessageOrDefault(message).replaceAll("&", "§");
 
         if (shellSec.getConfig().getBoolean("messages-as-titles", false)) {
             p.sendTitle(Constants.PREFIX, message, 10, 60, 10);
