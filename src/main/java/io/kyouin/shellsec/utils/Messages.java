@@ -36,14 +36,14 @@ public class Messages {
     }
 
     public void sendMessage(CommandSender to, Player who, String message, boolean canTitle) {
-        message = getMessageOrDefault(message).replaceAll("&", "§");
+        String updatedMessage = getMessageOrDefault(message).replaceAll("&", "§");
 
-        if (who != null) message = message.replace("{name}", to.getName());
+        if (who != null) updatedMessage = updatedMessage.replace("{name}", to.getName());
 
         if (canTitle && shellSec.getConfig().getBoolean("messages-as-titles", false)) {
-            ((Player) to).sendTitle(Constants.PREFIX, message, 10, 60, 10);
+            ((Player) to).sendTitle(Constants.PREFIX, updatedMessage, 10, 60, 10);
         } else {
-            to.sendMessage(Constants.PREFIX + " " + message);
+            to.sendMessage(Constants.PREFIX + " " + updatedMessage);
         }
     }
 
