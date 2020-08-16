@@ -5,6 +5,8 @@ import org.bukkit.NamespacedKey;
 
 public class Constants {
 
+    public final static String PREFIX = "§dShellSecurity";
+
     private final NamespacedKey shulkerOwnerKey;
 
     public Constants(ShellSecurity shellSec) {
@@ -14,8 +16,4 @@ public class Constants {
     public NamespacedKey getShulkerOwnerKey() {
         return shulkerOwnerKey;
     }
-
-    //static ones
-
-    public final static String PREFIX = "§dShellSecurity";
 }

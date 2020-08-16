@@ -1,23 +1,33 @@
+---
 main: io.kyouin.shellsec.ShellSecurity
 name: ShellSecurity
-version: '1.2.1'
+version: '1.2.2'
 api-version: '1.14'
-description: Property over shulker boxes!
+description: >
+  Property over shulker boxes!
 author: Kyouin
 permissions:
   shellsec.lock:
     default: true
-    description: Lock a shulker box.
+    description: >
+      Lock a shulker box.
   shellsec.bypass:
     default: op
-    description: Bypass a shulker box lock.
+    description: >
+      Bypass a shulker box lock.
   shellsec.alerts.*:
     default: op
-    description: See alerts for locked shulker boxes.
+    description: >
+      See alerts for locked shulker boxes.
     children:
       shellsec.alerts.break:
         default: op
-        description: See alerts when players try to break locked shulker boxes.
+        description: >
+          See alerts when players try to break
+          locked shulker boxes.
       shellsec.alerts.interact:
         default: op
-        description: See alerts when players try to interact with locked shulker boxes.
+        description: >
+          See alerts when players try to interact
+          with locked shulker boxes.
+...

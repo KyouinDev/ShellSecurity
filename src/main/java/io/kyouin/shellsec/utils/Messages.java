@@ -12,42 +12,38 @@ import java.nio.charset.StandardCharsets;
 public class Messages {
 
     private final ShellSecurity shellSec;
-    private final FileConfiguration defaultConfig;
+    private FileConfiguration defaultConfig;
     private FileConfiguration config;
 
     public Messages(ShellSecurity shellSec) {
         this.shellSec = shellSec;
 
-        InputStream is = shellSec.getResource("messages.yml");
+        try (InputStream is = shellSec.getResource("messages.yml")) {
+            if (is == null) throw new IllegalArgumentException("Couldn't find messages.yml");
 
-        if (is == null) throw new IllegalArgumentException("Couldn't find messages.yml");
+            shellSec.saveResource("messages.yml", false);
 
-        Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
-
-        shellSec.saveResource("messages.yml", false);
-        defaultConfig = YamlConfiguration.loadConfiguration(reader);
-        reloadConfig();
+            try (Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                defaultConfig = YamlConfiguration.loadConfiguration(reader);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void reloadConfig() {
         config = YamlConfiguration.loadConfiguration(new File(shellSec.getDataFolder(), "messages.yml"));
     }
 
-    public void sendMessage(CommandSender to, Player who, String message) {
+    public void sendMessage(CommandSender to, Player who, String message, boolean canTitle) {
         message = getMessageOrDefault(message).replaceAll("&", "§");
 
         if (who != null) message = message.replace("{name}", to.getName());
 
-        to.sendMessage(Constants.PREFIX + " " + message);
-    }
-
-    public void send(Player p, String message) {
-        message = getMessageOrDefault(message).replaceAll("&", "§");
-
-        if (shellSec.getConfig().getBoolean("messages-as-titles", false)) {
-            p.sendTitle(Constants.PREFIX, message, 10, 60, 10);
+        if (canTitle && shellSec.getConfig().getBoolean("messages-as-titles", false)) {
+            ((Player) to).sendTitle(Constants.PREFIX, message, 10, 60, 10);
         } else {
-            p.sendMessage(Constants.PREFIX + " " + message);
+            to.sendMessage(Constants.PREFIX + " " + message);
         }
     }
 
