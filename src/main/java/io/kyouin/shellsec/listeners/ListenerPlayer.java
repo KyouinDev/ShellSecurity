@@ -14,7 +14,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
@@ -62,21 +61,14 @@ public class ListenerPlayer implements Listener {
         ItemStack item = e.getItem();
         Material material = item == null ? Material.AIR : item.getType();
 
-        ShulkerBox shulker = (ShulkerBox) block.getState();
-        PersistentDataContainer dataContainer = shulker.getPersistentDataContainer();
-
         if (material == Material.NAME_TAG && shulkerOwner == null) {
             e.setCancelled(true);
 
             if (p.hasPermission("shellsec.lock")) {
-                if (shellSec.getConfig().getBoolean("disallows-lock-non-empty", false) && !Arrays.stream(shulker.getInventory().getContents()).allMatch(content -> content == null || content.getType() == Material.AIR)) {
+                if (shellSec.getConfig().getBoolean("disallows-lock-non-empty", false) && !Arrays.stream(((ShulkerBox) block.getState()).getInventory().getContents()).allMatch(content -> content == null || content.getType() == Material.AIR)) {
                     shellSec.getMessages().sendMessage(p, null, "cant-lock-non-empty", true);
                 } else {
-                    dataContainer.set(shellSec.getShulkerOwnerKey(), PersistentDataType.STRING, uuid);
-                    shulker.update();
-
-                    item.setAmount(item.getAmount() - 1);
-
+                    shellSec.applyNameTag(uuid, (ShulkerBox) block.getState(), item);
                     shellSec.getMessages().sendMessage(p, null, "shulker-locked", true);
                 }
             } else {
@@ -85,11 +77,7 @@ public class ListenerPlayer implements Listener {
         } else if (material == Material.MILK_BUCKET && shulkerOwner != null) {
             e.setCancelled(true);
 
-            dataContainer.remove(shellSec.getShulkerOwnerKey());
-            shulker.update();
-
-            item.setType(Material.BUCKET);
-
+            shellSec.applyMilkBucket((ShulkerBox) block.getState(), item);
             shellSec.getMessages().sendMessage(p, null,  "shulker-unlocked", true);
         }
     }

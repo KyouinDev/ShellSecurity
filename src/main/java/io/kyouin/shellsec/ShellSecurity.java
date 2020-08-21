@@ -4,10 +4,12 @@ import io.kyouin.shellsec.listeners.ListenerExplosion;
 import io.kyouin.shellsec.listeners.ListenerPlayer;
 import io.kyouin.shellsec.messages.Messages;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -39,6 +41,20 @@ public class ShellSecurity extends JavaPlugin {
         }
 
         return ((ShulkerBox) block.getState()).getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING);
+    }
+
+    public void applyNameTag(String who, ShulkerBox shulker, ItemStack nameTag) {
+        shulker.getPersistentDataContainer().set(shulkerOwnerKey, PersistentDataType.STRING, who);
+        shulker.update();
+
+        nameTag.setAmount(nameTag.getAmount() - 1);
+    }
+
+    public void applyMilkBucket(ShulkerBox shulker, ItemStack bucket) {
+        shulker.getPersistentDataContainer().remove(shulkerOwnerKey);
+        shulker.update();
+
+        bucket.setType(Material.BUCKET);
     }
 
     public void sendAlert(Player who, String message, String permission) {
