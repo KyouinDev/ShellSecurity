@@ -1,6 +1,6 @@
-package io.kyouin.shellsec.utils;
+package io.kyouin.shellsec;
 
-public class Constants {
+public class ShellConstants {
 
     public final static String PREFIX = "§dShellSecurity";
 

@@ -1,7 +1,6 @@
 package io.kyouin.shellsec.listeners;
 
 import io.kyouin.shellsec.ShellSecurity;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -53,10 +52,7 @@ public class ListenerPlayer implements Listener {
                 shellSec.getMessages().sendMessage(p, null, "cant-interact-locked", true);
 
                 if (shellSec.getConfig().getBoolean("admin-alerts-interact", true)) {
-                    shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), p, "interact-locked-attempt", false);
-                    Bukkit.getServer().getOnlinePlayers().stream()
-                            .filter(player -> player.hasPermission("shellsec.alerts.interact"))
-                            .forEach(op -> shellSec.getMessages().sendMessage(op, p, "interact-locked-attempt", false));
+                    shellSec.sendAlert(p, "interact-locked-attempt", "shellsec.alerts.interact");
                 }
             }
 
@@ -137,10 +133,7 @@ public class ListenerPlayer implements Listener {
             shellSec.getMessages().sendMessage(p, null,"cant-break-locked", true);
 
             if (shellSec.getConfig().getBoolean("admin-alerts-break", true)) {
-                shellSec.getMessages().sendMessage(Bukkit.getConsoleSender(), p, "break-locked-attempt", false);
-                Bukkit.getServer().getOnlinePlayers().stream()
-                        .filter(player -> player.hasPermission("shellsec.alerts.break"))
-                        .forEach(op -> shellSec.getMessages().sendMessage(op, p, "break-locked-attempt", false));
+                shellSec.sendAlert(p, "break-locked-attempt", "shellsec.alerts.break");
             }
 
             return;

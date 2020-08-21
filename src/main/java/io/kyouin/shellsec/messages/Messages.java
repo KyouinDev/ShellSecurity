@@ -1,5 +1,6 @@
-package io.kyouin.shellsec.utils;
+package io.kyouin.shellsec.messages;
 
+import io.kyouin.shellsec.ShellConstants;
 import io.kyouin.shellsec.ShellSecurity;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -41,9 +42,9 @@ public class Messages {
         }
 
         if (canTitle && shellSec.getConfig().getBoolean("messages-as-titles", false)) {
-            ((Player) to).sendTitle(Constants.PREFIX, updatedMessage, 10, 60, 10);
+            ((Player) to).sendTitle(ShellConstants.PREFIX, updatedMessage, 10, 60, 10);
         } else {
-            to.sendMessage(Constants.PREFIX + " " + updatedMessage);
+            to.sendMessage(ShellConstants.PREFIX + " " + updatedMessage);
         }
     }
 
