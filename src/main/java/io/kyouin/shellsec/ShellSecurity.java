@@ -4,15 +4,20 @@ import io.kyouin.shellsec.listeners.ListenerExplosion;
 import io.kyouin.shellsec.listeners.ListenerPlayer;
 import io.kyouin.shellsec.utils.Constants;
 import io.kyouin.shellsec.utils.Messages;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.block.ShulkerBox;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ShellSecurity extends JavaPlugin {
 
-    private final Constants constants;
+    private final NamespacedKey shulkerOwnerKey;
+
     private final Messages messages;
 
     public ShellSecurity() {
-        constants = new Constants(this);
+        shulkerOwnerKey = new NamespacedKey(this, Constants.OWNER_KEY);
         messages = new Messages(this);
     }
 
@@ -27,8 +32,16 @@ public class ShellSecurity extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenerPlayer(this), this);
     }
 
-    public Constants getConstants() {
-        return constants;
+    public String getShulkerOwner(Block block) {
+        if (!(block.getState() instanceof ShulkerBox)) {
+            return null;
+        }
+
+        return ((ShulkerBox) block.getState()).getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING);
+    }
+
+    public NamespacedKey getShulkerOwnerKey() {
+        return shulkerOwnerKey;
     }
 
     public Messages getMessages() {

@@ -19,6 +19,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ListenerPlayer implements Listener {
 
@@ -30,18 +31,19 @@ public class ListenerPlayer implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
 
         Block block = e.getClickedBlock();
 
-        if (block == null || !block.getType().name().contains("SHULKER_BOX")) return;
+        if (block == null || !block.getType().name().contains("SHULKER_BOX")) {
+            return;
+        }
 
         Player p = e.getPlayer();
         String uuid = p.getUniqueId().toString();
-        ShulkerBox shulker = (ShulkerBox) block.getState();
-        PersistentDataContainer dataContainer = shulker.getPersistentDataContainer();
-        NamespacedKey shulkerOwnerKey = shellSec.getConstants().getShulkerOwnerKey();
-        String shulkerOwner = dataContainer.get(shulkerOwnerKey, PersistentDataType.STRING);
+        String shulkerOwner = shellSec.getShulkerOwner(block);
 
         if (shulkerOwner != null && !shulkerOwner.equals(uuid)) {
             if (shellSec.getConfig().getBoolean("admin-bypass", true) && p.hasPermission("shellsec.bypass")) {
@@ -64,6 +66,9 @@ public class ListenerPlayer implements Listener {
         ItemStack item = e.getItem();
         Material material = item == null ? Material.AIR : item.getType();
 
+        ShulkerBox shulker = (ShulkerBox) block.getState();
+        PersistentDataContainer dataContainer = shulker.getPersistentDataContainer();
+
         if (material == Material.NAME_TAG && shulkerOwner == null) {
             e.setCancelled(true);
 
@@ -71,10 +76,11 @@ public class ListenerPlayer implements Listener {
                 if (shellSec.getConfig().getBoolean("disallows-lock-non-empty", false) && !Arrays.stream(shulker.getInventory().getContents()).allMatch(content -> content == null || content.getType() == Material.AIR)) {
                     shellSec.getMessages().sendMessage(p, null, "cant-lock-non-empty", true);
                 } else {
-                    dataContainer.set(shulkerOwnerKey, PersistentDataType.STRING, uuid);
+                    dataContainer.set(shellSec.getShulkerOwnerKey(), PersistentDataType.STRING, uuid);
                     shulker.update();
 
                     item.setAmount(item.getAmount() - 1);
+
                     shellSec.getMessages().sendMessage(p, null, "shulker-locked", true);
                 }
             } else {
@@ -83,22 +89,27 @@ public class ListenerPlayer implements Listener {
         } else if (material == Material.MILK_BUCKET && shulkerOwner != null) {
             e.setCancelled(true);
 
-            dataContainer.remove(shulkerOwnerKey);
+            dataContainer.remove(shellSec.getShulkerOwnerKey());
             shulker.update();
 
             item.setType(Material.BUCKET);
+
             shellSec.getMessages().sendMessage(p, null,  "shulker-unlocked", true);
         }
     }
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
-        if (!e.getBlock().getType().name().contains("SHULKER_BOX")) return;
+        if (!e.getBlock().getType().name().contains("SHULKER_BOX")) {
+            return;
+        }
 
         ItemMeta itemMeta = e.getItemInHand().getItemMeta();
-        NamespacedKey shulkerOwnerKey = shellSec.getConstants().getShulkerOwnerKey();
+        NamespacedKey shulkerOwnerKey = shellSec.getShulkerOwnerKey();
 
-        if (itemMeta == null || itemMeta.getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING) == null) return;
+        if (Objects.requireNonNull(itemMeta).getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING) == null) {
+            return;
+        }
 
         ShulkerBox shulker = (ShulkerBox) e.getBlock().getState();
         shulker.getPersistentDataContainer().set(shulkerOwnerKey, PersistentDataType.STRING, e.getPlayer().getUniqueId().toString());
@@ -107,13 +118,16 @@ public class ListenerPlayer implements Listener {
 
     @EventHandler
     public void onDestroy(BlockBreakEvent e) {
-        if (!e.getBlock().getType().name().contains("SHULKER_BOX")) return;
+        if (!e.getBlock().getType().name().contains("SHULKER_BOX")) {
+            return;
+        }
 
         Block block = e.getBlock();
-        NamespacedKey shulkerOwnerKey = shellSec.getConstants().getShulkerOwnerKey();
-        String shulkerOwner = ((ShulkerBox) block.getState()).getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING);
+        String shulkerOwner = shellSec.getShulkerOwner(block);
 
-        if (shulkerOwner == null) return;
+        if (shulkerOwner == null) {
+            return;
+        }
 
         Player p = e.getPlayer();
         String uuid = p.getUniqueId().toString();
@@ -134,10 +148,7 @@ public class ListenerPlayer implements Listener {
 
         block.getDrops().stream().filter(drop -> drop.getType().name().contains("SHULKER_BOX")).findAny().ifPresent(drop -> {
             ItemMeta itemMeta = drop.getItemMeta();
-
-            if (itemMeta == null) return;
-
-            itemMeta.getPersistentDataContainer().set(shulkerOwnerKey, PersistentDataType.STRING, shulkerOwner);
+            Objects.requireNonNull(itemMeta).getPersistentDataContainer().set(shellSec.getShulkerOwnerKey(), PersistentDataType.STRING, shulkerOwner);
             drop.setItemMeta(itemMeta);
 
             block.getWorld().dropItemNaturally(block.getLocation(), drop);

@@ -4,7 +4,6 @@ import io.kyouin.shellsec.ShellSecurity;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
-import org.bukkit.block.ShulkerBox;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ListenerExplosion implements Listener {
 
@@ -26,23 +26,25 @@ public class ListenerExplosion implements Listener {
     private void onExplosion(Event e) {
         List<Block> blocks;
 
-        if (e instanceof BlockExplodeEvent) blocks = ((BlockExplodeEvent) e).blockList();
-        else blocks = ((EntityExplodeEvent) e).blockList();
+        if (e instanceof BlockExplodeEvent) {
+            blocks = ((BlockExplodeEvent) e).blockList();
+        } else {
+            blocks = ((EntityExplodeEvent) e).blockList();
+        }
 
         if (shellSec.getConfig().getBoolean("explosions-break-locked", false)) {
-            NamespacedKey shulkerOwnerKey = shellSec.getConstants().getShulkerOwnerKey();
+            NamespacedKey shulkerOwnerKey = shellSec.getShulkerOwnerKey();
 
-            blocks.stream().filter(block -> block.getType().name().contains("SHULKER_BOX")).forEach(block -> {
-                String shulkerOwner = ((ShulkerBox) block.getState()).getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING);
+            blocks.forEach(block -> {
+                String shulkerOwner = shellSec.getShulkerOwner(block);
 
-                if (shulkerOwner == null) return;
+                if (shulkerOwner == null) {
+                    return;
+                }
 
                 block.getDrops().stream().filter(drop -> drop.getType().name().contains("SHULKER_BOX")).findAny().ifPresent(drop -> {
                     ItemMeta itemMeta = drop.getItemMeta();
-
-                    if (itemMeta == null) return;
-
-                    itemMeta.getPersistentDataContainer().set(shulkerOwnerKey, PersistentDataType.STRING, shulkerOwner);
+                    Objects.requireNonNull(itemMeta).getPersistentDataContainer().set(shulkerOwnerKey, PersistentDataType.STRING, shulkerOwner);
                     drop.setItemMeta(itemMeta);
 
                     block.getWorld().dropItemNaturally(block.getLocation(), drop);
@@ -52,7 +54,7 @@ public class ListenerExplosion implements Listener {
             });
         }
 
-        blocks.removeIf(block -> block.getType().name().endsWith("SHULKER_BOX"));
+        blocks.removeIf(block -> block.getType().name().contains("SHULKER_BOX"));
     }
 
     @EventHandler

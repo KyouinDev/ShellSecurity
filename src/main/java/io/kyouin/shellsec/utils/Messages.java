@@ -8,24 +8,22 @@ import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class Messages {
 
     private final ShellSecurity shellSec;
+
     private FileConfiguration defaultConfig;
     private FileConfiguration config;
 
     public Messages(ShellSecurity shellSec) {
         this.shellSec = shellSec;
 
-        try (InputStream is = shellSec.getResource("messages.yml")) {
-            if (is == null) throw new IllegalArgumentException("Couldn't find messages.yml");
+        shellSec.saveResource("messages.yml", false);
 
-            shellSec.saveResource("messages.yml", false);
-
-            try (Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                defaultConfig = YamlConfiguration.loadConfiguration(reader);
-            }
+        try (InputStream is = shellSec.getResource("messages.yml"); Reader reader = new InputStreamReader(Objects.requireNonNull(is), StandardCharsets.UTF_8)) {
+            defaultConfig = YamlConfiguration.loadConfiguration(reader);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -38,7 +36,9 @@ public class Messages {
     public void sendMessage(CommandSender to, Player who, String message, boolean canTitle) {
         String updatedMessage = getMessageOrDefault(message).replaceAll("&", "§");
 
-        if (who != null) updatedMessage = updatedMessage.replace("{name}", to.getName());
+        if (who != null) {
+            updatedMessage = updatedMessage.replace("{name}", to.getName());
+        }
 
         if (canTitle && shellSec.getConfig().getBoolean("messages-as-titles", false)) {
             ((Player) to).sendTitle(Constants.PREFIX, updatedMessage, 10, 60, 10);
