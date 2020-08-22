@@ -36,7 +36,7 @@ public class ListenerExplosion implements Listener {
             NamespacedKey shulkerOwnerKey = shellSec.getShulkerOwnerKey();
 
             blocks.forEach(block -> {
-                String shulkerOwner = shellSec.getShulkerOwner(block);
+                String shulkerOwner = shellSec.getShulkerOwner(block.getState());
 
                 if (shulkerOwner == null) {
                     return;

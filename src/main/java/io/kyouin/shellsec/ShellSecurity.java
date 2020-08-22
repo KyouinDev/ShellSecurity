@@ -6,7 +6,7 @@ import io.kyouin.shellsec.messages.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -35,12 +35,12 @@ public class ShellSecurity extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenerPlayer(this), this);
     }
 
-    public String getShulkerOwner(Block block) {
-        if (!(block.getState() instanceof ShulkerBox)) {
+    public String getShulkerOwner(BlockState blockState) {
+        if (!(blockState instanceof ShulkerBox)) {
             return null;
         }
 
-        return ((ShulkerBox) block.getState()).getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING);
+        return ((ShulkerBox) blockState).getPersistentDataContainer().get(shulkerOwnerKey, PersistentDataType.STRING);
     }
 
     public void applyNameTag(String who, ShulkerBox shulker, ItemStack nameTag) {
@@ -57,12 +57,14 @@ public class ShellSecurity extends JavaPlugin {
         bucket.setType(Material.BUCKET);
     }
 
-    public void sendAlert(Player who, String message, String permission) {
-        Bukkit.getServer().getOnlinePlayers().stream()
-                .filter(player -> player.hasPermission(permission))
-                .forEach(op -> messages.sendMessage(op, who, message, false));
+    public void sendAlert(Player who, String configKey, String message, String permission) {
+        if (getConfig().getBoolean(configKey, true)) {
+            Bukkit.getServer().getOnlinePlayers().stream()
+                    .filter(player -> player.hasPermission(permission))
+                    .forEach(op -> messages.sendMessage(op, who, message, false));
 
-        messages.sendMessage(Bukkit.getConsoleSender(), who, message, false);
+            messages.sendMessage(Bukkit.getConsoleSender(), who, message, false);
+        }
     }
 
     public NamespacedKey getShulkerOwnerKey() {

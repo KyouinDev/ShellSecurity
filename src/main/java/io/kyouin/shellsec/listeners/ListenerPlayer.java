@@ -4,6 +4,7 @@ import io.kyouin.shellsec.ShellSecurity;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,19 +30,15 @@ public class ListenerPlayer implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-
-        Block block = e.getClickedBlock();
-
-        if (block == null || !block.getType().name().contains("SHULKER_BOX")) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK || !Objects.requireNonNull(e.getClickedBlock()).getType().name().contains("SHULKER_BOX")) {
             return;
         }
 
         Player p = e.getPlayer();
         String uuid = p.getUniqueId().toString();
-        String shulkerOwner = shellSec.getShulkerOwner(block);
+
+        BlockState blockState = e.getClickedBlock().getState();
+        String shulkerOwner = shellSec.getShulkerOwner(blockState);
 
         if (shulkerOwner != null && !shulkerOwner.equals(uuid)) {
             if (shellSec.getConfig().getBoolean("admin-bypass", true) && p.hasPermission("shellsec.bypass")) {
@@ -49,10 +46,7 @@ public class ListenerPlayer implements Listener {
             } else {
                 e.setCancelled(true);
                 shellSec.getMessages().sendMessage(p, null, "cant-interact-locked", true);
-
-                if (shellSec.getConfig().getBoolean("admin-alerts-interact", true)) {
-                    shellSec.sendAlert(p, "interact-locked-attempt", "shellsec.alerts.interact");
-                }
+                shellSec.sendAlert(p, "admin-alerts-interact", "interact-locked-attempt", "shellsec.alerts.interact");
             }
 
             return;
@@ -61,24 +55,37 @@ public class ListenerPlayer implements Listener {
         ItemStack item = e.getItem();
         Material material = item == null ? Material.AIR : item.getType();
 
-        if (material == Material.NAME_TAG && shulkerOwner == null) {
-            e.setCancelled(true);
+        switch (material) {
+            case NAME_TAG:
+                if (shulkerOwner != null) break;
 
-            if (p.hasPermission("shellsec.lock")) {
-                if (shellSec.getConfig().getBoolean("disallows-lock-non-empty", false) && !Arrays.stream(((ShulkerBox) block.getState()).getInventory().getContents()).allMatch(content -> content == null || content.getType() == Material.AIR)) {
+                e.setCancelled(true);
+
+                if (!p.hasPermission("shellsec.lock")) {
+                    shellSec.getMessages().sendMessage(p, null, "cant-lock", true);
+
+                    break;
+                }
+
+                if (shellSec.getConfig().getBoolean("disallows-lock-non-empty", false) && !Arrays.stream(((ShulkerBox) blockState).getInventory().getContents()).allMatch(content -> content == null || content.getType() == Material.AIR)) {
                     shellSec.getMessages().sendMessage(p, null, "cant-lock-non-empty", true);
                 } else {
-                    shellSec.applyNameTag(uuid, (ShulkerBox) block.getState(), item);
+                    shellSec.applyNameTag(uuid, (ShulkerBox) blockState, item);
                     shellSec.getMessages().sendMessage(p, null, "shulker-locked", true);
                 }
-            } else {
-                shellSec.getMessages().sendMessage(p, null, "cant-lock", true);
-            }
-        } else if (material == Material.MILK_BUCKET && shulkerOwner != null) {
-            e.setCancelled(true);
 
-            shellSec.applyMilkBucket((ShulkerBox) block.getState(), item);
-            shellSec.getMessages().sendMessage(p, null,  "shulker-unlocked", true);
+                break;
+            case MILK_BUCKET:
+                if (shulkerOwner == null) break;
+
+                e.setCancelled(true);
+
+                shellSec.applyMilkBucket((ShulkerBox) blockState, item);
+                shellSec.getMessages().sendMessage(p, null,  "shulker-unlocked", true);
+
+                break;
+            default:
+                break;
         }
     }
 
@@ -107,7 +114,7 @@ public class ListenerPlayer implements Listener {
         }
 
         Block block = e.getBlock();
-        String shulkerOwner = shellSec.getShulkerOwner(block);
+        String shulkerOwner = shellSec.getShulkerOwner(block.getState());
 
         if (shulkerOwner == null) {
             return;
@@ -118,11 +125,9 @@ public class ListenerPlayer implements Listener {
 
         if (!shulkerOwner.equals(uuid)) {
             e.setCancelled(true);
-            shellSec.getMessages().sendMessage(p, null,"cant-break-locked", true);
 
-            if (shellSec.getConfig().getBoolean("admin-alerts-break", true)) {
-                shellSec.sendAlert(p, "break-locked-attempt", "shellsec.alerts.break");
-            }
+            shellSec.getMessages().sendMessage(p, null,"cant-break-locked", true);
+            shellSec.sendAlert(p, "admin-alerts-break", "break-locked-attempt", "shellsec.alerts.break");
 
             return;
         }
